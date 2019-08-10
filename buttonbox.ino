@@ -18,6 +18,8 @@
  * 
 */
 
+#include <Keyboard.h>
+
 /* How many shift register chips are daisy-chained.
 */
 #define NUMBER_OF_SHIFT_CHIPS   1
@@ -87,8 +89,57 @@ BYTES_VAL_T read_shift_regs()
 
 /* Dump the list of zones along with their current status.
 */
-void display_pin_values()
+void press_buttons()
 {
+    BYTES_VAL_T left = pinValues & 1;
+    BYTES_VAL_T oldLeft = oldPinValues & 1;
+    if (left == oldLeft) {
+      Serial.print("Left: not changed\r\n");
+    } else if (left) {
+      Keyboard.press(KEY_LEFT_ARROW);
+      Serial.print("Left: pressed\r\n");
+    } else {
+      Keyboard.release(KEY_LEFT_ARROW);
+      Serial.print("Left: released\r\n");
+    }
+
+    BYTES_VAL_T up = pinValues & 2;
+    BYTES_VAL_T oldUp= oldPinValues & 2;
+    if (up == oldUp) {
+      Serial.print("Up: not changed\r\n");
+    } else if (up) {
+      Keyboard.press(KEY_UP_ARROW);
+      Serial.print("Up: pressed\r\n");
+    } else {
+      Keyboard.release(KEY_UP_ARROW);
+      Serial.print("Up: released\r\n");
+    }
+
+    BYTES_VAL_T right = pinValues & 4;
+    BYTES_VAL_T oldRight= oldPinValues & 4;
+    if (right == oldRight) {
+      Serial.print("Right: not changed\r\n");
+    } else if (right) {
+      Keyboard.press(KEY_RIGHT_ARROW);
+      Serial.print("Right: pressed\r\n");
+    } else {
+      Keyboard.release(KEY_RIGHT_ARROW);
+      Serial.print("Right: released\r\n");
+    }
+    
+
+    BYTES_VAL_T down = pinValues & 8;
+    BYTES_VAL_T oldDown= oldPinValues & 8;
+    if (down == oldDown) {
+      Serial.print("Down: not changed\r\n");
+    } else if (down) {
+      Keyboard.press(KEY_DOWN_ARROW);
+      Serial.print("Down: pressed\r\n");
+    } else {
+      Keyboard.release(KEY_DOWN_ARROW);
+      Serial.print("Down: released\r\n");
+    }
+    
     Serial.print("Pin States:\r\n");
 
     for(int i = 0; i < DATA_WIDTH; i++)
@@ -111,7 +162,7 @@ void display_pin_values()
 void setup()
 {
     Serial.begin(9600);
-    while (!Serial) ;
+    //while (!Serial) ; // https://www.arduino.cc/en/Guide/ArduinoLeonardoMicro
 
     /* Initialize our digital pins...
     */
@@ -126,7 +177,6 @@ void setup()
     /* Read in and display the pin states at startup.
     */
     pinValues = read_shift_regs();
-    display_pin_values();
     oldPinValues = pinValues;
 }
 
@@ -141,7 +191,7 @@ void loop()
     if(pinValues != oldPinValues)
     {
         Serial.print("*Pin value change detected*\r\n");
-        display_pin_values();
+        press_buttons();
         oldPinValues = pinValues;
     }
 
